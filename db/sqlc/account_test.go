@@ -5,14 +5,15 @@ import (
 	"context"
 	"testing"
 
+	"github.com/harshaljanjani/cashflow.net/db/util"
 	"github.com/stretchr/testify/require"
 )
 func TestCreateAccount(t *testing.T){
-	// hard coding the argument for now
+	// generate random values, avoid conflicts between unit tests (helps in the case of unique constraints)
 	arg := CreateAccountParams{
-		Owner: "Tom",
-		Balance: 100,
-		Currency: "USD",
+		Owner: util.RandomOwner(),
+		Balance: util.RandomMoney(),
+		Currency: util.RandomCurrency(),
 	}
 	account, err := testQueries.CreateAccount(context.Background(), arg)
 	require.NoError(t,err)
