@@ -1,0 +1,19 @@
+# refer to https://hub.docker.com/_/postgres
+
+docker stop alpine-postgres12
+docker start alpine-postgres12
+docker images
+docker ps -a
+docker pull postgres:12-alpine -> pull alpine postgres image (lightweight)
+docker run --name alpine-postgres12 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret -p 5432:5432 -d postgres:12-alpine -> create docker container from alpine postgres image (port mapping from 5432 of localhost to 5432 of the container)
+docker exec -it alpine-postgres12 psql -U root -> access psql terminal
+docker logs alpine-postgres12 -> access logs
+docker exec -it alpine-postgres12 /bin/sh && ls -l -> access shell
+
+# createdb and dropdb from within the container shell 
+createdb --username=root --owner=root bankdb
+dropdb bankdb
+# createdb and dropdb from outside the container shell
+docker exec -it alpine-postgres12 createdb --username=root --owner=root bankdb
+docker exec -it alpine-postgres12 dropdb bankdb
+docker exec -it alpine-postgres12 psql -U root bankdb
