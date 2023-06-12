@@ -13,10 +13,16 @@ docker exec -it alpine-postgres12 /bin/sh && ls -l -> access shell
 # createdb and dropdb from within the container shell 
 createdb --username=root --owner=root bankdb
 dropdb bankdb
+
 # createdb and dropdb from outside the container shell
 docker exec -it alpine-postgres12 createdb --username=root --owner=root bankdb
 docker exec -it alpine-postgres12 dropdb bankdb
 docker exec -it alpine-postgres12 psql -U root bankdb
+
 # migration command 
 migrate -path db/migration -database "postgresql://root:secret@localhost:5432/bankdb?sslmode=disable" -verbose up
 docker run --rm -v "%cd%:/src" -w /src kjconroy/sqlc generate
+
+# go dependencies
+go get github.com/stretchr/testify
+go get github.com/lib/pq
