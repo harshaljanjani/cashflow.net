@@ -74,7 +74,7 @@ func (store *Store) TransferTx(ctx context.Context, arg TransferTxParams) (Trans
 		
 		// 1) create transfer record
 		var err error
-		result.Transfer, err = q.CreateTransfer(ctx, CreateTransferParams{
+		result.Transfer, err = q.CreateTransfer(ctx, TransferTxParams{
 			FromAccountID:arg.FromAccountID,
 			ToAccountID:arg.ToAccountID,
 			Amount:arg.Amount,
