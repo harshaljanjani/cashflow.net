@@ -69,8 +69,38 @@ type TransferTxResult struct {
 
 func (store *Store) TransferTx(ctx context.Context, arg TransferTxParams) (TransferTxResult, error){
 	var result TransferTxResult
+
 	err := store.execTx(ctx, func(q *Queries) error{
-		// yet to implement callback function
+		// accessing variable result from outside the scope of this function (callback becomes closure (no generics in Go))
+		
+		// 1) create transfer record
+		var err error
+		result.Transfer, err := q.CreateTransfer(ctx, CreateTransferParams{
+			FromAccountID:arg.FromAccountID,
+			ToAccountID:arg.ToAccountID,
+			Amount:arg.Amount,
+		})
+		if err != nil{
+			return err
+		}
+
+		// 2) account entries creation
+		result.FromEntry, err = q.CreateEntry(ctx, CreateEntryParams{
+			AccountID: arg.FromAccountID,
+			Amount: -arg.Amount, // money is moving out
+		})
+		if err != nil{
+			return err
+		}
+		result.ToEntry, err = q.CreateEntry(ctx, CreateEntryParams{
+			AccountID: arg.ToAccountID,
+			Amount: arg.Amount, // money is moving in
+		})
+		if err != nil{
+			return err
+		}
+
+		//TODO: update account balance
 		return nil
 	})
 	return result, err
