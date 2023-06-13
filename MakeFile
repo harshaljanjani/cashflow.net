@@ -10,5 +10,11 @@ migratedown:
 	migrate -path db/migration -database "postgresql://root:secret@localhost:5432/bankdb?sslmode=disable" -verbose down
 sqlc: 
 	docker run --rm -v "%cd%:/src" -w /src kjconroy/sqlc generate
+test:
+	go test -v -cover ./...
+startcontainer:
+	docker start alpine-postgres12
+stopcontainer:
+	docker stop alpine-postgres12
 
-.PHONY: createdb dropdb postgres migrateup migratedown sqlc
+.PHONY: createdb dropdb postgres migrateup migratedown sqlc test startcontainer stopcontainer
