@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -13,6 +14,8 @@ func TestTransferTx(t *testing.T) {
 	account1 := createRandomAccount(t)
 	account2 := createRandomAccount(t)
 	// concurrency control: best practice to run concurrent co-routines
+	// writing logs (before)
+	fmt.Println(">> before:", account1.Balance, account2.Balance)
 	n := 5 // number of concurrent transactions
 	amount := int64(10) // amount of transfer
 	errs := make(chan error) // connect co-routines (without explicit locking)
@@ -32,6 +35,9 @@ func TestTransferTx(t *testing.T) {
 	}
 		// check result
 		// check if k is unique with every transaction
+		// idea: create a map, add k values with every transaction
+		// if k exists in the map already, fail test
+		uniqueMap := make(map[int]bool)
 		for i := 0; i < n; i++{
 			err := <- errs
 			require.NoError(t, err)
@@ -81,6 +87,8 @@ func TestTransferTx(t *testing.T) {
 			require.NotEmpty(t, toAccount)
 			require.Equal(t, account1.ID, toAccount)
 
+			// writing logs (after each transaction)
+			fmt.Println(">> after:", fromAccount.Balance, toAccount.Balance)
 			// check balance
 			diff1 := account1.Balance - fromAccount.Balance // account1 -> before transaction
 			// account2 -> after transaction
@@ -91,6 +99,19 @@ func TestTransferTx(t *testing.T) {
 			k := int(diff1 / amount) 
 			require.True(t, k >= 1 && k <= n)
 			
-			// TODO: check k value is unique or not
+			// check uniqueness of k
+			require.NotContains(t, uniqueMap, k)
+			uniqueMap[k] = true
 		}
+
+		// check final updated balance
+		updatedAccount1, err := testQueries.GetAccount(context.Background(), account1.ID)
+		require.NoError(t, err)
+		updatedAccount2, err := testQueries.GetAccount(context.Background(), account2.ID)
+		require.NoError(t, err)
+		
+		// writing logs (after all transactions)
+		fmt.Println(">> after:", updatedAccount1.Balance, updatedAccount2.Balance)
+		require.Equal(t, account1.Balance - int64(n) * amount, updatedAccount1.Balance)
+		require.Equal(t, account2.Balance + int64(n) * amount, updatedAccount2.Balance)
 	}
