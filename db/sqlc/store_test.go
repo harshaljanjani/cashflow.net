@@ -31,6 +31,7 @@ func TestTransferTx(t *testing.T) {
 		}()
 	}
 		// check result
+		// check if k is unique with every transaction
 		for i := 0; i < n; i++{
 			err := <- errs
 			require.NoError(t, err)
@@ -70,6 +71,26 @@ func TestTransferTx(t *testing.T) {
 			_, err = store.GetEntry(context.Background(), toEntry.ID)
 			require.NoError(t, err)
 			
-			//TODO: check account balance
+			// writing tests first instead (trying out TDD): check account balance
+			// things to keep in mind: concurrency control and deadlock prevention
+			fromAccount := result.FromAccount
+			require.NotEmpty(t, fromAccount)
+			require.Equal(t, account1.ID, fromAccount)
+			// toAccount
+			toAccount := result.ToAccount
+			require.NotEmpty(t, toAccount)
+			require.Equal(t, account1.ID, toAccount)
+
+			// check balance
+			diff1 := account1.Balance - fromAccount.Balance // account1 -> before transaction
+			// account2 -> after transaction
+			diff2 := toAccount.Balance - account2.Balance
+			require.Equal(t, diff1, diff2)
+			require.True(t, diff1 % amount == 0)
+			// each time the transaction is made, the balance of account1 would be decreased by (1 * amount) -> 1 * amount, 2 * amount, 3 * amount ...
+			k := int(diff1 / amount) 
+			require.True(t, k >= 1 && k <= n)
+			
+			// TODO: check k value is unique or not
 		}
 	}
