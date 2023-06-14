@@ -14,7 +14,7 @@ WHERE id = $1 LIMIT 1;
 -- name: GetAccountForUpdate :one
 SELECT * FROM accounts
 WHERE id = $1 LIMIT 1
-FOR NO KEY UPDATE;
+FOR NO KEY UPDATE; /* txlock occurs because -> tx1 would affect txnid, that would affect FK constraints and cause deadlock -> solution: added NO KEY UPDATE instead of UPDATE (tell explicitly that we are not updating the primary key, we are only changing the account balance with UpdateAccount()) */
 
 -- name: ListAccounts :many
 SELECT * FROM accounts
@@ -24,7 +24,7 @@ LIMIT $2
 OFFSET $3;
 
 -- name: UpdateAccount :one
-UPDATE accounts
+UPDATE accounts /* only updating balance, not txn_id */
 SET balance = $2
 WHERE id = $1
 RETURNING *;

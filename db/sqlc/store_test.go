@@ -17,16 +17,15 @@ func TestTransferTx(t *testing.T) {
 	// writing logs (before)
 	fmt.Println(">> before:", account1.Balance, account2.Balance)
 
-	//TODO: (to be removed) reducing number of concurrent transactions to debug deadlock
-	n := 2 // number of concurrent transactions
+	n := 5 // number of concurrent transactions
 	amount := int64(10) // amount of transfer
 	errs := make(chan error) // connect co-routines (without explicit locking)
 	results := make(chan TransferTxResult)  
 	for i := 0; i < n; i++{
 		// start new go routine
-		txName := fmt.Sprintf("tx %d", i+1)
 		go func(){
-			ctx := context.WithValue(context.Background(), txKey, txName)
+			// removed adding value to the context
+			ctx := context.Background()
 			result, err := store.TransferTx(ctx, TransferTxParams{
 				FromAccountID: account1.ID,
 				ToAccountID: account2.ID,
