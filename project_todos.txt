@@ -1,0 +1,11 @@
+// project: cashflow.net
+
+// date: 20.06.2023
+// todo topic: tasks to complete while implementing ACID (atomicity-consistency-isolation-durability)
+// source: https://www.infoq.com/articles/Isolation-Levels/
+1) eliminate read phenomena (phantom read, serialization anomaly, dirty read, non-repeatable read)
+2) implement one of the four isolation levels defined by ANSI (depending on the db, low to high levels of isolation)
+    a) lowest: read-uncommited (allows dirty read)
+    b) medium: read-commited (no dirty read)
+    c) high: repeatable-read (same search query returns same result)
+    d) very high: serializable (concurrent transactions behave as if they are executed sequentially, and without overlapping)
